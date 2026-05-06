@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Westfield Market Intelligence Dashboard</title>
+    <title>Westfield Market Intelligence [BETA]</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -13,112 +13,99 @@
             --dark: #34495e;
             --success: #27ae60;
             --danger: #c0392b;
+            --warning: #f39c12;
         }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--primary);
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f4f7f6;
-        }
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-        .stat-box {
-            text-align: center;
-            padding: 15px;
-            background: var(--light);
-            border-radius: 6px;
-            border-top: 4px solid var(--accent);
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: var(--primary); max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #f4f7f6; }
+        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; position: relative; }
+        .beta-tag { position: absolute; top: 10px; right: 10px; background: var(--warning); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin: 20px 0; }
+        .stat-box { text-align: center; padding: 15px; background: var(--light); border-radius: 6px; border-top: 4px solid var(--accent); }
         .stat-value { font-size: 24px; font-weight: bold; display: block; color: var(--dark); }
         .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #7f8c8d; }
         
-        /* Agent Styling */
+        .disclaimer { font-size: 11px; color: #7f8c8d; background: #fff5e6; border: 1px solid #ffe8cc; padding: 10px; border-radius: 4px; margin-top: 15px; line-height: 1.4; }
+        
+        /* AI Agent Interface */
         #ai-agent-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
         #agent-fab {
             width: 60px; height: 60px; border-radius: 50%; background: var(--dark);
             color: white; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            font-size: 24px; transition: 0.3s;
+            font-size: 24px; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         #agent-fab:hover { transform: scale(1.1); background: var(--accent); }
+        
         #chat-window {
-            display: none; width: 320px; height: 400px; background: white;
+            display: none; width: 320px; height: 420px; background: white;
             border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-            flex-direction: column; overflow: hidden; margin-bottom: 15px;
+            flex-direction: column; overflow: hidden; margin-bottom: 15px; border: 1px solid #ddd;
         }
-        .chat-header { background: var(--dark); color: white; padding: 12px; font-weight: bold; display: flex; justify-content: space-between; }
+        .chat-header { background: var(--dark); color: white; padding: 12px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         .chat-messages { flex: 1; padding: 15px; overflow-y: auto; font-size: 13px; background: #f9f9f9; display: flex; flex-direction: column; }
-        .bot-msg { background: #e0e6ed; padding: 8px; border-radius: 8px; margin-bottom: 10px; align-self: flex-start; }
+        .msg { margin-bottom: 12px; padding: 10px; border-radius: 8px; max-width: 85%; line-height: 1.4; }
+        .bot-msg { background: #e0e6ed; color: var(--dark); align-self: flex-start; border-bottom-left-radius: 2px; }
         
         .chart-container { position: relative; height: 280px; width: 100%; }
-        .quote-box { font-style: italic; border-left: 5px solid var(--accent); padding: 15px; background: #fffdfa; font-size: 0.95em; }
     </style>
 </head>
 <body>
 
-    <h1>Market Intelligence: Westfield, IN</h1>
+    <header style="margin-bottom: 30px;">
+        <h1 style="margin:0;">Market Intelligence: Westfield, IN</h1>
+        <p style="color:#7f8c8d; margin:5px 0;">Strategic Product Development Dashboard [v0.8.2 Beta]</p>
+    </header>
     
-    <!-- Top Metrics -->
+    <!-- Inventory Section -->
     <div class="card">
-        <h2>Supply & Absorption Velocity</h2>
+        <span class="beta-tag">BETA ANALYSIS</span>
+        <h2>Estimated Supply & Absorption</h2>
         <div class="stats-grid">
-            <div class="stat-box" style="border-top-color: var(--success);">
-                <span class="stat-value" id="mos-display">3.4</span>
-                <span class="stat-label">Months of Supply (MOS)</span>
+            <div class="stat-box" style="border-top-color: var(--danger);">
+                <span class="stat-value">3.4*</span>
+                <span class="stat-label">Blended MOS</span>
             </div>
             <div class="stat-box">
-                <span class="stat-value" id="ttm-total">1,137</span>
-                <span class="stat-label">TTM Total Permits</span>
+                <span class="stat-value">94.75</span>
+                <span class="stat-label">Monthly SF Absorption</span>
             </div>
             <div class="stat-box">
-                <span class="stat-value" id="monthly-rate">94.75</span>
-                <span class="stat-label">Monthly Absorption</span>
+                <span class="stat-value">1,137</span>
+                <span class="stat-label">TTM SF Permits</span>
             </div>
             <div class="stat-box">
                 <span class="stat-value" style="color:var(--danger)">-42%</span>
-                <span class="stat-label">YoY Trend (Mar)</span>
+                <span class="stat-label">YoY Permit Trend</span>
             </div>
+        </div>
+        <div class="disclaimer">
+            <strong>*Strategic Note:</strong> This 3.4 MOS utilize "Blended" vacant parcel data (All Residential). 
+            When filtered for <strong>Single-Family Detached</strong> zoning, the supply indicates a critical vacuum (< 2.0 months).
         </div>
     </div>
 
-    <!-- Visual Trajectory -->
+    <!-- Trajectory Section -->
     <div class="card">
-        <h2>Permit Volume Trajectory</h2>
+        <h2>Single-Family Permit Trajectory</h2>
         <div class="chart-container">
             <canvas id="permitChart"></canvas>
         </div>
     </div>
 
-    <!-- The "Why" -->
-    <div class="card">
-        <h2>Pipeline Context</h2>
-        <div class="quote-box" id="pipeline-quote">
-            "With inventory tightening to <strong>3.4 months of supply</strong>, the Noblesville-Westfield corridor is entering a supply vacuum. This supports a high-margin Build-to-Order strategy over heavy spec-building."
-        </div>
-    </div>
-
-    <!-- AI Agent -->
+    <!-- AI Agent Interface -->
     <div id="ai-agent-container">
         <div id="chat-window">
             <div class="chat-header">
-                <span>Market Analyst AI</span>
-                <button onclick="toggleChat()" style="background:none; border:none; color:white; cursor:pointer;">✕</button>
+                <span>Product Analyst AI</span>
+                <button onclick="toggleChat()" style="background:none; border:none; color:white; cursor:pointer; font-size:16px;">✕</button>
             </div>
             <div class="chat-messages" id="chat-messages">
-                <div class="bot-msg">Welcome, Alan. I've analyzed the Q1 2026 Pulte data. Local inventory is lean at 1.4 specs per community. I'm ready for the meeting.</div>
+                <div class="msg bot-msg">
+                    <strong>Market Anomaly Detected:</strong> 
+                    Westfield SF Permits are down 42% YoY, but inventory is tightening. This indicates a supply cliff, not a demand drop. 
+                </div>
+                <div class="msg bot-msg">
+                    Currently stress-testing the "Blended MOS" against Pulte's <strong>1.4 spec-per-community</strong> target. Ready to review?
+                </div>
             </div>
         </div>
         <button id="agent-fab" onclick="toggleChat()">🤖</button>
@@ -135,22 +122,39 @@
             chat.style.display = (chat.style.display === 'flex') ? 'none' : 'flex';
         }
 
-        function renderChart() {
+        window.onload = function() {
             const ctx = document.getElementById('permitChart').getContext('2d');
             new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
                     datasets: [
-                        { label: '2025 Volume', data: permitData[2025], borderColor: '#34495e', tension: 0.3 },
-                        { label: '2026 Velocity', data: permitData[2026], borderColor: '#e67e22', borderWidth: 4, tension: 0.3 }
+                        { 
+                            label: '2025 SF Permits', 
+                            data: permitData[2025], 
+                            borderColor: '#34495e', 
+                            backgroundColor: 'rgba(52, 73, 94, 0.1)',
+                            fill: true,
+                            tension: 0.3 
+                        },
+                        { 
+                            label: '2026 Velocity', 
+                            data: permitData[2026], 
+                            borderColor: '#e67e22', 
+                            borderWidth: 4, 
+                            tension: 0.3,
+                            pointBackgroundColor: '#e67e22'
+                        }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: { y: { beginAtZero: true } }
+                }
             });
-        }
-
-        window.onload = renderChart;
+        };
     </script>
 </body>
 </html>
