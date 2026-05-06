@@ -36,26 +36,26 @@
         #agent-fab:hover { transform: scale(1.1); background: var(--accent); }
         
         #chat-window {
-            display: none; width: 320px; height: 420px; background: white;
+            display: none; width: 340px; height: 450px; background: white;
             border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
             flex-direction: column; overflow: hidden; margin-bottom: 15px; border: 1px solid #ddd;
         }
         .chat-header { background: var(--dark); color: white; padding: 12px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         .chat-messages { flex: 1; padding: 15px; overflow-y: auto; font-size: 13px; background: #f9f9f9; display: flex; flex-direction: column; }
-        .msg { margin-bottom: 12px; padding: 10px; border-radius: 8px; max-width: 85%; line-height: 1.4; }
+        .msg { margin-bottom: 12px; padding: 10px; border-radius: 8px; max-width: 90%; line-height: 1.4; }
         .bot-msg { background: #e0e6ed; color: var(--dark); align-self: flex-start; border-bottom-left-radius: 2px; }
         
-        .chart-container { position: relative; height: 280px; width: 100%; }
+        .chart-container { position: relative; height: 300px; width: 100%; }
     </style>
 </head>
 <body>
 
     <header style="margin-bottom: 30px;">
         <h1 style="margin:0;">Market Intelligence: Westfield, IN</h1>
-        <p style="color:#7f8c8d; margin:5px 0;">Strategic Product Development Dashboard [v0.8.2 Beta]</p>
+        <p style="color:#7f8c8d; margin:5px 0;">Strategic Product Development Dashboard [v0.9.1 Beta]</p>
     </header>
     
-    <!-- Inventory Section -->
+    <!-- Supply & Absorption Section -->
     <div class="card">
         <span class="beta-tag">BETA ANALYSIS</span>
         <h2>Estimated Supply & Absorption</h2>
@@ -78,17 +78,25 @@
             </div>
         </div>
         <div class="disclaimer">
-            <strong>*Strategic Note:</strong> This 3.4 MOS utilize "Blended" vacant parcel data (All Residential). 
-            When filtered for <strong>Single-Family Detached</strong> zoning, the supply indicates a critical vacuum (< 2.0 months).
+            <strong>*Data Integrity Note:</strong> This 3.4 Months of Supply (MOS) utilizes a "Blended" vacant parcel dataset (All Residential Types). 
+            When filtered strictly for <strong>Single-Family Detached</strong> zoning, the supply indicates a critical vacuum (< 2.0 months).
         </div>
     </div>
 
-    <!-- Trajectory Section -->
+    <!-- Permit Velocity Chart -->
     <div class="card">
-        <h2>Single-Family Permit Trajectory</h2>
+        <h2>Single-Family Permit Velocity (SF Only)</h2>
         <div class="chart-container">
             <canvas id="permitChart"></canvas>
         </div>
+    </div>
+
+    <!-- Strategy Section -->
+    <div class="card">
+        <h2>Market Context</h2>
+        <p style="font-size: 14px; color: #555;">
+            Current 2026 data indicates that despite higher interest rates, Westfield's <strong>inventory scarcity</strong> remains the primary market driver. Pulte's strategy of maintaining <strong>1.4 spec homes per community</strong> aligns with this "Supply Vacuum" reality.
+        </p>
     </div>
 
     <!-- AI Agent Interface -->
@@ -104,7 +112,10 @@
                     Westfield SF Permits are down 42% YoY, but inventory is tightening. This indicates a supply cliff, not a demand drop. 
                 </div>
                 <div class="msg bot-msg">
-                    Currently stress-testing the "Blended MOS" against Pulte's <strong>1.4 spec-per-community</strong> target. Ready to review?
+                    <strong>Absorption Note:</strong> Pulte's <strong>60% Build-to-Order</strong> mix means these 1,137 TTM permits are highly correlated with actual contract signings, not speculative building.
+                </div>
+                <div class="msg bot-msg">
+                    With only <strong>1.4 specs per community</strong>, the risk of "stale" inventory is minimized. Shall we cross-reference this with the next land acquisition phase?
                 </div>
             </div>
         </div>
@@ -112,6 +123,7 @@
     </div>
 
     <script>
+        // Data provided for Single Family Permits
         const permitData = {
             2025: [145, 99, 156, 95, 95, 95, 97, 78, 65, 64, 91, 173],
             2026: [133, 60, 91] 
@@ -133,25 +145,35 @@
                             label: '2025 SF Permits', 
                             data: permitData[2025], 
                             borderColor: '#34495e', 
-                            backgroundColor: 'rgba(52, 73, 94, 0.1)',
+                            backgroundColor: 'rgba(52, 73, 94, 0.05)',
                             fill: true,
-                            tension: 0.3 
+                            tension: 0.3,
+                            borderDash: [5, 5]
                         },
                         { 
                             label: '2026 Velocity', 
                             data: permitData[2026], 
                             borderColor: '#e67e22', 
                             borderWidth: 4, 
-                            tension: 0.3,
-                            pointBackgroundColor: '#e67e22'
+                            pointRadius: 6,
+                            pointBackgroundColor: '#e67e22',
+                            tension: 0.3
                         }
                     ]
                 },
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } },
-                    scales: { y: { beginAtZero: true } }
+                    plugins: { 
+                        legend: { position: 'bottom' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: { 
+                        y: { 
+                            beginAtZero: true,
+                            title: { display: true, text: 'Units Permitted' }
+                        }
+                    }
                 }
             });
         };
