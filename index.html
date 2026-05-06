@@ -1,1 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Westfield SF Market Intelligence</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e67e22;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --success: #27ae60;
+            --danger: #c0392b;
+        }
+        body { font-family: 'Segoe UI', sans-serif; line-height: 1.6; color: var(--primary); max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #f4f7f6; }
+        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin: 20px 0; }
+        .stat-box { text-align: center; padding: 15px; background: var(--light); border-radius: 6px; border-top: 4px solid var(--accent); }
+        .stat-value { font-size: 24px; font-weight: bold; display: block; color: var(--dark); }
+        .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #7f8c8d; }
+        
+        #ai-agent-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
+        #agent-fab { width: 60px; height: 60px; border-radius: 50%; background: var(--dark); color: white; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-size: 24px; }
+        #chat-window { display: none; width: 320px; height: 400px; background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); flex-direction: column; overflow: hidden; margin-bottom: 15px; }
+        .chat-header { background: var(--dark); color: white; padding: 12px; font-weight: bold; display: flex; justify-content: space-between; }
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; font-size: 13px; background: #f9f9f9; display: flex; flex-direction: column; }
+        .bot-msg { background: #e0e6ed; padding: 8px; border-radius: 8px; margin-bottom: 10px; align-self: flex-start; }
+        
+        .chart-container { position: relative; height: 280px; width: 100%; }
+        .quote-box { font-style: italic; border-left: 5px solid var(--accent); padding: 15px; background: #fffdfa; font-size: 0.95em; }
+    </style>
+</head>
+<body>
 
+    <h1>Single-Family Market Intelligence: Westfield</h1>
+    
+    <div class="card">
+        <h2>Single-Family (SF) Supply & Absorption</h2>
+        <div class="stats-grid">
+            <div class="stat-box" style="border-top-color: var(--success);">
+                <span class="stat-value">3.4</span>
+                <span class="stat-label">MOS (SF Detached)</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-value">1,137</span>
+                <span class="stat-label">TTM SF Permits</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-value">94.75</span>
+                <span class="stat-label">Monthly SF Absorption</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-value" style="color:var(--danger)">-42%</span>
+                <span class="stat-label">YoY SF Trend (Mar)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>SF Permit Volume Trajectory</h2>
+        <div class="chart-container">
+            <canvas id="permitChart"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Pipeline Context</h2>
+        <div class="quote-box">
+            "While Westfield remains a high-growth market, the **Single-Family Detached** sector is tightening. With only 3.4 months of SF supply left, land acquisition for SF-zoned parcels remains critical."
+        </div>
+    </div>
+
+    <!-- AI Agent -->
+    <div id="ai-agent-container">
+        <div id="chat-window">
+            <div class="chat-header">
+                <span>Market Analyst AI</span>
+                <button onclick="toggleChat()" style="background:none; border:none; color:white; cursor:pointer;">✕</button>
+            </div>
+            <div class="chat-messages">
+                <div class="bot-msg">Welcome, Alan. I noticed the SF permit trend is diverging from multi-family inventory. I've isolated Single-Family metrics for the Pulte presentation.</div>
+            </div>
+        </div>
+        <button id="agent-fab" onclick="toggleChat()">🤖</button>
+    </div>
+
+    <script>
+        const permitData = {
+            2025: [145, 99, 156, 95, 95, 95, 97, 78, 65, 64, 91, 173],
+            2026: [133, 60, 91] 
+        };
+
+        function toggleChat() {
+            const chat = document.getElementById('chat-window');
+            chat.style.display = (chat.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        window.onload = function() {
+            const ctx = document.getElementById('permitChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                    datasets: [
+                        { label: '2025 SF Permits', data: permitData[2025], borderColor: '#34495e', tension: 0.3 },
+                        { label: '2026 SF Velocity', data: permitData[2026], borderColor: '#e67e22', borderWidth: 4, tension: 0.3 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        };
+    </script>
+</body>
+</html>
