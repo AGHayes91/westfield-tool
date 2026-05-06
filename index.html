@@ -3,35 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Westfield Inventory Tool</title>
+    <title>Westfield AI Assistant</title>
     <style>
-        body { font-family: sans-serif; padding: 40px; background-color: #f4f7f6; color: #333; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 15px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; margin-top: 0; }
-        .upload-box { background: #e9ecef; padding: 20px; border-radius: 6px; border: 2px dashed #ced4da; text-align: center; }
-        input[type="file"] { margin-top: 10px; }
-        #searchInput { width: 100%; padding: 12px; margin: 20px 0; border: 1px solid #ddd; border-radius: 4px; display: none; box-sizing: border-box; }
-        #status { font-weight: bold; color: #007bff; margin-bottom: 10px; }
-        .table-container { overflow-x: auto; margin-top: 20px; border: 1px solid #eee; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
-        th { background-color: #2c3e50; color: white; position: sticky; top: 0; }
-        tr:nth-child(even) { background-color: #f8f9fa; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background-color: #f0f2f5; color: #1a202c; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        h1 { color: #2d3748; margin-top: 0; text-align: center; font-size: 1.5rem; }
+        
+        /* Upload Area */
+        .upload-box { background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px dashed #cbd5e0; text-align: center; margin-bottom: 20px; }
+        input[type="file"] { margin-top: 10px; font-size: 0.9rem; }
+
+        /* AI Chat Area */
+        #aiSection { display: none; margin-bottom: 30px; padding: 20px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; }
+        .chat-controls { display: flex; gap: 10px; }
+        #askInput { flex-grow: 1; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; outline: none; }
+        #askBtn { padding: 12px 24px; background: #3182ce; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #askBtn:hover { background: #2b6cb0; }
+        #aiResponse { margin-top: 15px; padding: 15px; background: #ebf8ff; border-left: 4px solid #3182ce; border-radius: 4px; color: #2c5282; line-height: 1.5; font-size: 1.1rem; }
+
+        /* Table Area */
+        .table-container { overflow-x: auto; margin-top: 20px; max-height: 400px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th, td { border-bottom: 1px solid #edf2f7; padding: 12px; text-align: left; }
+        th { background-color: #2d3748; color: white; position: sticky; top: 0; }
+        tr:hover { background-color: #f7fafc; }
+        #status { font-size: 0.8rem; color: #718096; margin-top: 10px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Westfield Parcel Inventory</h1>
+    <h1>Westfield Property AI Agent</h1>
     
-    <div class="upload-box">
-        <strong>Upload your CSV file:</strong><br>
+    <div class="upload-box" id="uploadBox">
+        <strong>Step 1: Load your inventory data</strong><br>
         <input type="file" id="fileInput" accept=".csv">
     </div>
 
-    <input type="text" id="searchInput" placeholder="Search metrics...">
-    
-    <div id="status">Waiting for file...</div>
+    <!-- AI Agent Interface -->
+    <div id="aiSection">
+        <p><strong>Step 2: Ask the Agent a question</strong></p>
+        <div class="chat-controls">
+            <input type="text" id="askInput" placeholder="Try: 'total parcels' or 'vacant land'...">
+            <button id="askBtn">Ask Agent</button>
+        </div>
+        <div id="aiResponse" style="display:none;"></div>
+    </div>
+
+    <div id="status">Waiting for CSV file...</div>
 
     <div class="table-container">
         <table id="dataTable">
@@ -43,63 +62,84 @@
 
 <script>
     const fileInput = document.getElementById('fileInput');
-    const searchInput = document.getElementById('searchInput');
-    const status = document.getElementById('status');
+    const askInput = document.getElementById('askInput');
+    const askBtn = document.getElementById('askBtn');
+    const aiResponse = document.getElementById('aiResponse');
+    const aiSection = document.getElementById('aiSection');
     const tableBody = document.getElementById('tableBody');
     const headerRow = document.getElementById('headerRow');
+    const status = document.getElementById('status');
 
+    // Handle File Upload
     fileInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
 
-        status.innerText = "Loading " + file.name + "...";
-        
         const reader = new FileReader();
-
         reader.onload = function(event) {
-            try {
-                const text = event.target.result;
-                const rows = text.split(/\r?\n/).filter(row => row.trim() !== "");
-                
-                headerRow.innerHTML = "";
-                tableBody.innerHTML = "";
+            const text = event.target.result;
+            const rows = text.split(/\r?\n/).filter(row => row.trim() !== "");
+            
+            headerRow.innerHTML = "";
+            tableBody.innerHTML = "";
 
-                // Headers
-                const headers = rows[0].split(',');
-                headers.forEach(h => {
-                    const th = document.createElement('th');
-                    th.innerText = h.replace(/['"]+/g, '');
-                    headerRow.appendChild(th);
+            // Create Headers
+            const headers = rows[0].split(',');
+            headers.forEach(h => {
+                const th = document.createElement('th');
+                th.innerText = h.replace(/['"]+/g, '');
+                headerRow.appendChild(th);
+            });
+
+            // Create Rows
+            for (let i = 1; i < rows.length; i++) {
+                const tr = document.createElement('tr');
+                const cells = rows[i].split(',');
+                cells.forEach(c => {
+                    const td = document.createElement('td');
+                    td.innerText = c.replace(/['"]+/g, '');
+                    tr.appendChild(td);
                 });
-
-                // Data
-                for (let i = 1; i < rows.length; i++) {
-                    const tr = document.createElement('tr');
-                    const cells = rows[i].split(',');
-                    cells.forEach(c => {
-                        const td = document.createElement('td');
-                        td.innerText = c.replace(/['"]+/g, '');
-                        tr.appendChild(td);
-                    });
-                    tableBody.appendChild(tr);
-                }
-
-                status.innerText = "Showing " + (rows.length - 1) + " rows.";
-                searchInput.style.display = "block";
-
-            } catch (err) {
-                status.innerText = "Error reading file.";
+                tableBody.appendChild(tr);
             }
-        };
 
+            status.innerText = "Data Loaded Successfully.";
+            aiSection.style.display = "block";
+            document.getElementById('uploadBox').style.display = "none";
+        };
         reader.readAsText(file);
     });
 
-    searchInput.addEventListener('keyup', function() {
-        const filter = searchInput.value.toLowerCase();
-        const trs = tableBody.getElementsByTagName('tr');
-        for (let i = 0; i < trs.length; i++) {
-            trs[i].style.display = trs[i].textContent.toLowerCase().includes(filter) ? "" : "none";
+    // Simple AI Logic
+    askBtn.addEventListener('click', function() {
+        const query = askInput.value.toLowerCase();
+        const rows = Array.from(tableBody.getElementsByTagName('tr'));
+        let found = false;
+
+        // Search through the metrics in the table
+        for (let row of rows) {
+            const metric = row.cells[0].innerText.toLowerCase();
+            const value = row.cells[1].innerText;
+            
+            // Check if the user's question mentions a keyword from the metric
+            if (query.includes(metric) || metric.includes(query)) {
+                aiResponse.innerHTML = `<strong>Agent:</strong> The data shows ${value} for <strong>${row.cells[0].innerText}</strong>.`;
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            aiResponse.innerHTML = "<strong>Agent:</strong> I'm not sure about that one. Try asking about 'parcels', 'vacant', or 'supply'.";
+        }
+
+        aiResponse.style.display = "block";
+    });
+
+    // Allow pressing "Enter" to ask
+    askInput.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            askBtn.click();
         }
     });
 </script>
