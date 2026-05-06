@@ -4,18 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Westfield Market Intelligence Dashboard</title>
+    <!-- Include Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #2c3e50;
             --accent: #e67e22;
             --light: #ecf0f1;
             --dark: #34495e;
+            --danger: #c0392b;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             color: var(--primary);
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f4f7f6;
@@ -41,35 +44,50 @@
             border-top: 4px solid var(--accent);
         }
         .stat-value {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             display: block;
             color: var(--dark);
         }
         .stat-label {
-            font-size: 14px;
+            font-size: 11px;
             text-transform: uppercase;
+            letter-spacing: 1px;
             color: #7f8c8d;
+            margin-top: 5px;
+            display: block;
         }
+        .trend-down { color: var(--danger); font-size: 0.8em; }
         .quote-box {
             font-style: italic;
             border-left: 5px solid var(--accent);
-            padding: 15px 25px;
+            padding: 20px 30px;
             background: #fffdfa;
             margin: 20px 0;
+            font-size: 1.1em;
+            line-height: 1.8;
         }
-        h1, h2 { color: var(--dark); }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        h1, h2 { color: var(--dark); margin-bottom: 10px; }
         .data-source {
-            font-size: 12px;
+            font-size: 11px;
             color: #95a5a6;
-            margin-top: 10px;
+            margin-top: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
         }
     </style>
 </head>
 <body>
 
-    <h1>Westfield Market Analysis</h1>
+    <h1>Market Intelligence: Westfield, IN</h1>
     
+    <!-- Top Stats -->
     <div class="card">
         <h2>Supply & Absorption Metrics</h2>
         <div class="stats-grid">
@@ -79,20 +97,29 @@
             </div>
             <div class="stat-box">
                 <span class="stat-value" id="monthly-rate">...</span>
-                <span class="stat-label">Monthly Absorption</span>
+                <span class="stat-label">Avg. Monthly Absorption</span>
             </div>
             <div class="stat-box">
                 <span class="stat-value" id="trend-indicator">...</span>
-                <span class="stat-label">Current Trend</span>
+                <span class="stat-label">YoY Momentum (Mar)</span>
             </div>
         </div>
-        <p class="data-source">Source: MarketGraphics Regional Reports (2024-2026)</p>
     </div>
 
+    <!-- The Visual Proof -->
+    <div class="card">
+        <h2>Permit Volume Trajectory</h2>
+        <div class="chart-container">
+            <canvas id="permitChart"></canvas>
+        </div>
+        <p class="data-source">Source: Analysis of MarketGraphics Regional Reports (2024-2026).</p>
+    </div>
+
+    <!-- The Narrative -->
     <div class="card">
         <h2>Pipeline Context</h2>
         <div class="quote-box" id="pipeline-quote">
-            Loading market analysis...
+            Analyzing current market trajectory...
         </div>
     </div>
 
@@ -101,44 +128,82 @@
         const permitData = {
             2024: [155, 116, 178, 191, 183, 121, 115, 128, 155, 128, 77, 100],
             2025: [145, 99, 156, 95, 95, 95, 97, 78, 65, 64, 91, 173],
-            2026: [133, 60, 91] // Q1 2026 Data[cite: 3]
+            2026: [133, 60, 91] 
         };
 
-        function updateDashboard() {
-            // 1. Calculate Trailing 12 Months (TTM)
-            const allPermits = [
-                ...permitData[2024], 
-                ...permitData[2025], 
-                ...permitData[2026]
-            ];
-            
+        const monthLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        function initDashboard() {
+            const allPermits = [...permitData[2024], ...permitData[2025], ...permitData[2026]];
             const last12Months = allPermits.slice(-12);
             const ttmTotal = last12Months.reduce((a, b) => a + b, 0);
             const monthlyRate = (ttmTotal / 12).toFixed(2);
 
-            // 2. Calculate YoY Trend for the current month (March)
-            const march26 = permitData[2026][2]; // 91
-            const march25 = permitData[2025][2]; // 156
+            // YoY Trend (March 26 vs March 25)
+            const march26 = permitData[2026][2];
+            const march25 = permitData[2025][2];
             const trend = (((march26 - march25) / march25) * 100).toFixed(0);
 
-            // 3. Update UI Elements
+            // UI Updates
             document.getElementById('ttm-total').textContent = ttmTotal.toLocaleString();
             document.getElementById('monthly-rate').textContent = monthlyRate;
-            document.getElementById('trend-indicator').textContent = `${trend}% YoY`;
-
-            // 4. Update the Pipeline Quote
-            const quoteElement = document.getElementById('pipeline-quote');
-            quoteElement.innerHTML = `
+            document.getElementById('trend-indicator').innerHTML = `<span class="trend-down">${trend}%</span>`;
+            document.getElementById('pipeline-quote').innerHTML = `
                 "While Westfield remains a premier growth honors market, new supply is tightening significantly. 
                 As of Q1 2026, the trailing 12-month absorption has adjusted to <strong>${monthlyRate} permits per month</strong>—a 
-                notable decrease from the 2024 highs. This constriction in the pipeline, combined with limited 
-                shovel-ready plat availability, suggests a looming supply vacuum for townhome developments 
-                in the Noblesville-Westfield corridor."
+                notable decrease from the 2024 highs[cite: 1, 2, 3]. This constriction in the pipeline suggests a 
+                looming supply vacuum for townhome developments in the Noblesville-Westfield corridor."
             `;
+
+            renderChart();
         }
 
-        // Initialize on load
-        window.onload = updateDashboard;
+        function renderChart() {
+            const ctx = document.getElementById('permitChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: monthLabels,
+                    datasets: [
+                        {
+                            label: '2024 Permits',
+                            data: permitData[2024],
+                            borderColor: '#bdc3c7',
+                            borderDash: [5, 5],
+                            tension: 0.3,
+                            fill: false
+                        },
+                        {
+                            label: '2025 Permits',
+                            data: permitData[2025],
+                            borderColor: '#34495e',
+                            tension: 0.3,
+                            fill: false
+                        },
+                        {
+                            label: '2026 Permits (YTD)',
+                            data: permitData[2026],
+                            borderColor: '#e67e22',
+                            borderWidth: 4,
+                            tension: 0.3,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'Units' } }
+                    }
+                }
+            });
+        }
+
+        window.onload = initDashboard;
     </script>
 </body>
 </html>
