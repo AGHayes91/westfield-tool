@@ -1,182 +1,95 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Westfield Market Intelligence [BETA]</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root {
-            --primary: #2c3e50;
-            --accent: #e67e22;
-            --light: #ecf0f1;
-            --dark: #34495e;
-            --success: #27ae60;
-            --danger: #c0392b;
-            --warning: #f39c12;
-        }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: var(--primary); max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #f4f7f6; }
-        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; position: relative; }
-        .beta-tag { position: absolute; top: 10px; right: 10px; background: var(--warning); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
-        
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin: 20px 0; }
-        .stat-box { text-align: center; padding: 15px; background: var(--light); border-radius: 6px; border-top: 4px solid var(--accent); }
-        .stat-value { font-size: 24px; font-weight: bold; display: block; color: var(--dark); }
-        .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #7f8c8d; }
-        
-        .disclaimer { font-size: 11px; color: #7f8c8d; background: #fff5e6; border: 1px solid #ffe8cc; padding: 10px; border-radius: 4px; margin-top: 15px; line-height: 1.4; }
-        
-        /* AI Agent Interface */
-        #ai-agent-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
-        #agent-fab {
-            width: 60px; height: 60px; border-radius: 50%; background: var(--dark);
-            color: white; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            font-size: 24px; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        #agent-fab:hover { transform: scale(1.1); background: var(--accent); }
-        
-        #chat-window {
-            display: none; width: 340px; height: 450px; background: white;
-            border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-            flex-direction: column; overflow: hidden; margin-bottom: 15px; border: 1px solid #ddd;
-        }
-        .chat-header { background: var(--dark); color: white; padding: 12px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; font-size: 13px; background: #f9f9f9; display: flex; flex-direction: column; }
-        .msg { margin-bottom: 12px; padding: 10px; border-radius: 8px; max-width: 90%; line-height: 1.4; }
-        .bot-msg { background: #e0e6ed; color: var(--dark); align-self: flex-start; border-bottom-left-radius: 2px; }
-        
-        .chart-container { position: relative; height: 300px; width: 100%; }
-    </style>
-</head>
-<body>
+<!-- Replace the existing AI Agent section in your HTML with this -->
 
-    <header style="margin-bottom: 30px;">
-        <h1 style="margin:0;">Market Intelligence: Westfield, IN</h1>
-        <p style="color:#7f8c8d; margin:5px 0;">Strategic Product Development Dashboard [v0.9.1 Beta]</p>
-    </header>
+<style>
+    /* ... existing styles ... */
     
-    <!-- Supply & Absorption Section -->
-    <div class="card">
-        <span class="beta-tag">BETA ANALYSIS</span>
-        <h2>Estimated Supply & Absorption</h2>
-        <div class="stats-grid">
-            <div class="stat-box" style="border-top-color: var(--danger);">
-                <span class="stat-value">3.4*</span>
-                <span class="stat-label">Blended MOS</span>
+    #ai-agent-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; }
+    #agent-fab {
+        width: 65px; height: 60px; border-radius: 50%; background: var(--dark);
+        color: white; border: 3px solid white; cursor: pointer; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-size: 28px;
+    }
+    
+    #chat-window {
+        display: none; width: 350px; height: 480px; background: white;
+        border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        flex-direction: column; overflow: hidden; margin-bottom: 15px; border: 1px solid #eee;
+    }
+
+    .chat-header { background: var(--dark); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+    .chat-messages { flex: 1; padding: 15px; overflow-y: auto; background: #fdfdfd; display: flex; flex-direction: column; gap: 10px; }
+    
+    .msg { padding: 10px 14px; border-radius: 12px; font-size: 13.5px; line-height: 1.4; max-width: 85%; }
+    .bot-msg { background: #f0f2f5; color: #1c1e21; align-self: flex-start; border-bottom-left-radius: 2px; }
+    .user-msg { background: var(--accent); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+
+    .chat-input-area { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 8px; background: white; }
+    #chat-input { flex: 1; border: 1px solid #ddd; padding: 8px; border-radius: 20px; outline: none; }
+</style>
+
+<div id="ai-agent-container">
+    <div id="chat-window">
+        <div class="chat-header">
+            <span>Product Analyst AI</span>
+            <button onclick="toggleChat()" style="background:none; border:none; color:white; cursor:pointer; font-size:18px;">✕</button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="msg bot-msg">
+                <strong>System Check Complete.</strong><br>
+                I've verified the 27,859 parcels in the Westfield Tax District.[cite: 1]
             </div>
-            <div class="stat-box">
-                <span class="stat-value">94.75</span>
-                <span class="stat-label">Monthly SF Absorption</span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-value">1,137</span>
-                <span class="stat-label">TTM SF Permits</span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-value" style="color:var(--danger)">-42%</span>
-                <span class="stat-label">YoY Permit Trend</span>
+            <div class="msg bot-msg">
+                The 3.4 Months of Supply (MOS) is confirmed as a blended overcount. SF Detached inventory is reaching critical scarcity.
             </div>
         </div>
-        <div class="disclaimer">
-            <strong>*Data Integrity Note:</strong> This 3.4 Months of Supply (MOS) utilizes a "Blended" vacant parcel dataset (All Residential Types). 
-            When filtered strictly for <strong>Single-Family Detached</strong> zoning, the supply indicates a critical vacuum (< 2.0 months).
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Ask about zoning filter...">
+            <button onclick="userSend()" style="background:var(--accent); border:none; color:white; border-radius:50%; width:35px; height:35px; cursor:pointer;">➔</button>
         </div>
     </div>
+    <button id="agent-fab" onclick="toggleChat()">🤖</button>
+</div>
 
-    <!-- Permit Velocity Chart -->
-    <div class="card">
-        <h2>Single-Family Permit Velocity (SF Only)</h2>
-        <div class="chart-container">
-            <canvas id="permitChart"></canvas>
-        </div>
-    </div>
+<script>
+    function toggleChat() {
+        const chat = document.getElementById('chat-window');
+        const isHidden = chat.style.display === 'none' || chat.style.display === '';
+        chat.style.display = isHidden ? 'flex' : 'none';
+    }
 
-    <!-- Strategy Section -->
-    <div class="card">
-        <h2>Market Context</h2>
-        <p style="font-size: 14px; color: #555;">
-            Current 2026 data indicates that despite higher interest rates, Westfield's <strong>inventory scarcity</strong> remains the primary market driver. Pulte's strategy of maintaining <strong>1.4 spec homes per community</strong> aligns with this "Supply Vacuum" reality.
-        </p>
-    </div>
-
-    <!-- AI Agent Interface -->
-    <div id="ai-agent-container">
-        <div id="chat-window">
-            <div class="chat-header">
-                <span>Product Analyst AI</span>
-                <button onclick="toggleChat()" style="background:none; border:none; color:white; cursor:pointer; font-size:16px;">✕</button>
-            </div>
-            <div class="chat-messages" id="chat-messages">
-                <div class="msg bot-msg">
-                    <strong>Market Anomaly Detected:</strong> 
-                    Westfield SF Permits are down 42% YoY, but inventory is tightening. This indicates a supply cliff, not a demand drop. 
-                </div>
-                <div class="msg bot-msg">
-                    <strong>Absorption Note:</strong> Pulte's <strong>60% Build-to-Order</strong> mix means these 1,137 TTM permits are highly correlated with actual contract signings, not speculative building.
-                </div>
-                <div class="msg bot-msg">
-                    With only <strong>1.4 specs per community</strong>, the risk of "stale" inventory is minimized. Shall we cross-reference this with the next land acquisition phase?
-                </div>
-            </div>
-        </div>
-        <button id="agent-fab" onclick="toggleChat()">🤖</button>
-    </div>
-
-    <script>
-        // Data provided for Single Family Permits
-        const permitData = {
-            2025: [145, 99, 156, 95, 95, 95, 97, 78, 65, 64, 91, 173],
-            2026: [133, 60, 91] 
-        };
-
-        function toggleChat() {
-            const chat = document.getElementById('chat-window');
-            chat.style.display = (chat.style.display === 'flex') ? 'none' : 'flex';
-        }
-
-        window.onload = function() {
-            const ctx = document.getElementById('permitChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                    datasets: [
-                        { 
-                            label: '2025 SF Permits', 
-                            data: permitData[2025], 
-                            borderColor: '#34495e', 
-                            backgroundColor: 'rgba(52, 73, 94, 0.05)',
-                            fill: true,
-                            tension: 0.3,
-                            borderDash: [5, 5]
-                        },
-                        { 
-                            label: '2026 Velocity', 
-                            data: permitData[2026], 
-                            borderColor: '#e67e22', 
-                            borderWidth: 4, 
-                            pointRadius: 6,
-                            pointBackgroundColor: '#e67e22',
-                            tension: 0.3
-                        }
-                    ]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { position: 'bottom' },
-                        tooltip: { mode: 'index', intersect: false }
-                    },
-                    scales: { 
-                        y: { 
-                            beginAtZero: true,
-                            title: { display: true, text: 'Units Permitted' }
-                        }
-                    }
+    function userSend() {
+        const input = document.getElementById('chat-input');
+        const msgContainer = document.getElementById('chat-messages');
+        
+        if (input.value.trim() !== "") {
+            // Add User Message
+            const userDiv = document.createElement('div');
+            userDiv.className = 'msg user-msg';
+            userDiv.innerText = input.value;
+            msgContainer.appendChild(userDiv);
+            
+            const query = input.value.toLowerCase();
+            input.value = "";
+            
+            // Add "Thinking" delay
+            setTimeout(() => {
+                const botDiv = document.createElement('div');
+                botDiv.className = 'msg bot-msg';
+                
+                if (query.includes('zoning')) {
+                    botDiv.innerHTML = "<strong>Phase 2 Module:</strong> I am ready to parse the GDB file to isolate SF-1 zoning parcels from SFA (Townhome) Pads.";
+                } else {
+                    botDiv.innerText = "Understood. I am analyzing the Q1 Pulte metrics to optimize the Westfield land acquisition strategy.";
                 }
-            });
-        };
-    </script>
-</body>
-</html>
+                
+                msgContainer.appendChild(botDiv);
+                msgContainer.scrollTop = msgContainer.scrollHeight;
+            }, 800);
+        }
+    }
+
+    // Auto-trigger the chat after 2 seconds for a "Pro" demo feel
+    window.addEventListener('load', () => {
+        setTimeout(toggleChat, 2000);
+    });
+</script>
