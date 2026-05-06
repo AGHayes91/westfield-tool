@@ -3,31 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Westfield AI Assistant</title>
+    <title>Westfield Property AI Assistant</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background-color: #f0f2f5; color: #1a202c; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        h1 { color: #2d3748; margin-top: 0; text-align: center; font-size: 1.5rem; }
+        .container { max-width: 850px; margin: auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        h1 { color: #2d3748; margin-top: 0; text-align: center; font-size: 1.8rem; }
         
-        /* Upload Area */
-        .upload-box { background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px dashed #cbd5e0; text-align: center; margin-bottom: 20px; }
-        input[type="file"] { margin-top: 10px; font-size: 0.9rem; }
+        /* Intro Summary Box */
+        .intro-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 25px; line-height: 1.6; color: #4a5568; }
+        .intro-box h3 { margin-top: 0; color: #2d3748; border-bottom: 2px solid #3182ce; display: inline-block; padding-bottom: 4px; margin-bottom: 12px; }
 
-        /* AI Chat Area */
-        #aiSection { display: none; margin-bottom: 30px; padding: 20px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; }
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: #fff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px; text-align: center; transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .stat-card .val { display: block; font-size: 1.5rem; font-weight: bold; color: #3182ce; }
+        .stat-card .lbl { font-size: 0.75rem; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+
+        /* AI & Upload Area */
+        .upload-box { background: #edf2f7; padding: 25px; border-radius: 12px; border: 2px dashed #cbd5e0; text-align: center; margin-bottom: 20px; }
+        #aiSection { display: none; margin-bottom: 30px; padding: 25px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
         .chat-controls { display: flex; gap: 10px; }
         #askInput { flex-grow: 1; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; outline: none; font-size: 1rem; }
         #askBtn { padding: 12px 24px; background: #3182ce; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         #askBtn:hover { background: #2b6cb0; }
-        
-        #aiResponse { margin-top: 15px; padding: 15px; background: #ebf8ff; border-left: 4px solid #3182ce; border-radius: 4px; color: #2c5282; line-height: 1.5; font-size: 1.1rem; animation: fadeIn 0.3s ease-in; }
+        #aiResponse { margin-top: 15px; padding: 15px; background: #ebf8ff; border-left: 4px solid #3182ce; border-radius: 4px; color: #2c5282; font-size: 1.1rem; animation: fadeIn 0.4s ease-in; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Table Area */
         .table-container { overflow-x: auto; margin-top: 20px; max-height: 400px; border-radius: 8px; border: 1px solid #e2e8f0; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th, td { border-bottom: 1px solid #edf2f7; padding: 10px; text-align: left; }
+        th, td { border-bottom: 1px solid #edf2f7; padding: 12px; text-align: left; }
         th { background-color: #2d3748; color: white; position: sticky; top: 0; }
         tr:hover { background-color: #f7fafc; }
         #status { font-size: 0.8rem; color: #718096; margin-top: 10px; text-align: center; }
@@ -36,18 +43,29 @@
 <body>
 
 <div class="container">
-    <h1>Westfield Property AI Agent</h1>
+    <h1>Westfield Property AI Assistant</h1>
+
+    <div class="intro-box">
+        <h3>Market Context</h3>
+        <p>This tool analyzes Westfield's residential pipeline. In 2023, the city issued <strong>1,149 home permits</strong>, establishing the current absorption pace. By analyzing every parcel in the city, we can determine the "Years of Supply" remaining in the ground. This metric helps planners and developers understand if the market is oversupplied or approaching a land shortage.</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card"><span class="val">27,873</span><span class="lbl">Total Parcels</span></div>
+        <div class="stat-card"><span class="val">18,704</span><span class="lbl">Single Family</span></div>
+        <div class="stat-card"><span class="val">3,746</span><span class="lbl">Vacant Pipeline</span></div>
+        <div class="stat-card"><span class="val">~3.3 Yrs</span><span class="lbl">Supply Pace</span></div>
+    </div>
     
     <div class="upload-box" id="uploadBox">
-        <strong>Step 1: Load Westfield Inventory CSV</strong><br>
+        <strong>Step 1: Load Inventory File</strong><br>
         <input type="file" id="fileInput" accept=".csv">
     </div>
 
-    <!-- AI Agent Interface -->
     <div id="aiSection">
-        <p><strong>Step 2: Ask the Agent about the data</strong></p>
+        <p><strong>Step 2: Query the Pipeline</strong></p>
         <div class="chat-controls">
-            <input type="text" id="askInput" placeholder="e.g., 'How many homes?' or 'Total parcels'...">
+            <input type="text" id="askInput" placeholder="Try: 'How much vacant land?' or 'What is the supply?'">
             <button id="askBtn">Ask Agent</button>
         </div>
         <div id="aiResponse" style="display:none;"></div>
@@ -73,7 +91,6 @@
     const headerRow = document.getElementById('headerRow');
     const status = document.getElementById('status');
 
-    // Handle File Upload
     fileInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -111,7 +128,6 @@
         reader.readAsText(file);
     });
 
-    // Smart AI Logic for Demo
     askBtn.addEventListener('click', function() {
         const query = askInput.value.toLowerCase().trim();
         if (!query) return;
@@ -119,26 +135,22 @@
         const rows = Array.from(tableBody.getElementsByTagName('tr'));
         let foundMatch = null;
 
-        // Synonym Map to make the demo feel "smarter"
         const synonyms = {
-            "total": ["total", "how many", "count", "parcels"],
-            "vacant": ["vacant", "pipeline", "unbuilt", "left", "available"],
+            "total": ["total", "how many", "count", "parcels", "every"],
+            "vacant": ["vacant", "pipeline", "unbuilt", "empty", "residential pipeline"],
             "single family": ["single family", "houses", "homes", "residential"],
-            "supply": ["supply", "years", "pace", "how long"],
+            "supply": ["supply", "years", "pace", "how long", "absorption"],
             "commercial": ["commercial", "business", "land"],
             "townhome": ["townhome", "attached", "condo"]
         };
 
-        // 1. Check for Synonym matches
         for (let metricKey in synonyms) {
             if (synonyms[metricKey].some(syn => query.includes(syn))) {
-                // Find the row that matches the metricKey
                 foundMatch = rows.find(row => row.cells[0].innerText.toLowerCase().includes(metricKey));
                 if (foundMatch) break;
             }
         }
 
-        // 2. If no synonym match, try a direct text match
         if (!foundMatch) {
             foundMatch = rows.find(row => row.cells[0].innerText.toLowerCase().includes(query) || query.includes(row.cells[0].innerText.toLowerCase()));
         }
@@ -148,13 +160,12 @@
             const countValue = foundMatch.cells[1].innerText;
             aiResponse.innerHTML = `<strong>Agent:</strong> For <strong>${metricName}</strong>, the record shows <strong>${countValue}</strong>.`;
         } else {
-            aiResponse.innerHTML = "<strong>Agent:</strong> I couldn't find a direct match for that. Try asking about 'Total Parcels', 'Vacant Pipeline', or 'Supply Years'.";
+            aiResponse.innerHTML = "<strong>Agent:</strong> I couldn't find that exact data point. Try asking about 'Total Parcels', 'Vacant Pipeline', or 'Supply Years'.";
         }
 
         aiResponse.style.display = "block";
     });
 
-    // Enter Key Support
     askInput.addEventListener("keypress", (e) => { if (e.key === "Enter") askBtn.click(); });
 </script>
 
