@@ -1,35 +1,156 @@
-<div class="card">
-    <h2>Inventory Health</h2>
-    <div class="stats-grid">
-        <!-- New Months of Supply Counter -->
-        <div class="stat-box" style="border-top-color: #27ae60;">
-            <span class="stat-value" id="mos-value">...</span>
-            <span class="stat-label">Months of Supply (MOS)</span>
-        </div>
-        <div class="stat-box">
-            <span class="stat-value" id="inventory-count">...</span>
-            <span class="stat-label">Standing Inventory</span>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Westfield Market Intelligence Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e67e22;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --success: #27ae60;
+            --danger: #c0392b;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--primary);
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f7f6;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-box {
+            text-align: center;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 6px;
+            border-top: 4px solid var(--accent);
+        }
+        .stat-value { font-size: 24px; font-weight: bold; display: block; color: var(--dark); }
+        .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #7f8c8d; }
+        
+        /* Agent Styling */
+        #ai-agent-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
+        #agent-fab {
+            width: 60px; height: 60px; border-radius: 50%; background: var(--dark);
+            color: white; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            font-size: 24px; transition: 0.3s;
+        }
+        #agent-fab:hover { transform: scale(1.1); background: var(--accent); }
+        #chat-window {
+            display: none; width: 320px; height: 400px; background: white;
+            border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            flex-direction: column; overflow: hidden; margin-bottom: 15px;
+        }
+        .chat-header { background: var(--dark); color: white; padding: 12px; font-weight: bold; display: flex; justify-content: space-between; }
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; font-size: 13px; background: #f9f9f9; display: flex; flex-direction: column; }
+        .bot-msg { background: #e0e6ed; padding: 8px; border-radius: 8px; margin-bottom: 10px; align-self: flex-start; }
+        
+        .chart-container { position: relative; height: 280px; width: 100%; }
+        .quote-box { font-style: italic; border-left: 5px solid var(--accent); padding: 15px; background: #fffdfa; font-size: 0.95em; }
+    </style>
+</head>
+<body>
+
+    <h1>Market Intelligence: Westfield, IN</h1>
+    
+    <!-- Top Metrics -->
+    <div class="card">
+        <h2>Supply & Absorption Velocity</h2>
+        <div class="stats-grid">
+            <div class="stat-box" style="border-top-color: var(--success);">
+                <span class="stat-value" id="mos-display">3.4</span>
+                <span class="stat-label">Months of Supply (MOS)</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-value" id="ttm-total">1,137</span>
+                <span class="stat-label">TTM Total Permits</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-value" id="monthly-rate">94.75</span>
+                <span class="stat-label">Monthly Absorption</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-value" style="color:var(--danger)">-42%</span>
+                <span class="stat-label">YoY Trend (Mar)</span>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    // Based on Pulte's Q1 2026 regional data and local permits[cite: 1, 3]
-    function calculateMOS() {
-        const monthlyAbsorption = 94.75; // Our TTM Average
-        const currentInventory = 322;    // Estimated active units in Hamilton Co.
-        
-        const mos = (currentInventory / monthlyAbsorption).toFixed(1);
-        
-        document.getElementById('mos-value').textContent = mos;
-        document.getElementById('inventory-count').textContent = currentInventory;
-        
-        // Update the AI Agent message to reflect this
-        const chatBox = document.getElementById('chat-messages');
-        const mosAlert = document.createElement('div');
-        mosAlert.className = 'msg bot-msg';
-        mosAlert.innerHTML = `<strong>Inventory Alert:</strong> Westfield is currently at <strong>${mos} months of supply</strong>. This indicates a tightening market favorable for the new Townhome phase.`;
-        chatBox.appendChild(mosAlert);
-    }
-    // Call this inside your initDashboard function
-</script>
+    <!-- Visual Trajectory -->
+    <div class="card">
+        <h2>Permit Volume Trajectory</h2>
+        <div class="chart-container">
+            <canvas id="permitChart"></canvas>
+        </div>
+    </div>
+
+    <!-- The "Why" -->
+    <div class="card">
+        <h2>Pipeline Context</h2>
+        <div class="quote-box" id="pipeline-quote">
+            "With inventory tightening to <strong>3.4 months of supply</strong>, the Noblesville-Westfield corridor is entering a supply vacuum. This supports a high-margin Build-to-Order strategy over heavy spec-building."
+        </div>
+    </div>
+
+    <!-- AI Agent -->
+    <div id="ai-agent-container">
+        <div id="chat-window">
+            <div class="chat-header">
+                <span>Market Analyst AI</span>
+                <button onclick="toggleChat()" style="background:none; border:none; color:white; cursor:pointer;">✕</button>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="bot-msg">Welcome, Alan. I've analyzed the Q1 2026 Pulte data. Local inventory is lean at 1.4 specs per community. I'm ready for the meeting.</div>
+            </div>
+        </div>
+        <button id="agent-fab" onclick="toggleChat()">🤖</button>
+    </div>
+
+    <script>
+        const permitData = {
+            2025: [145, 99, 156, 95, 95, 95, 97, 78, 65, 64, 91, 173],
+            2026: [133, 60, 91] 
+        };
+
+        function toggleChat() {
+            const chat = document.getElementById('chat-window');
+            chat.style.display = (chat.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('permitChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                    datasets: [
+                        { label: '2025 Volume', data: permitData[2025], borderColor: '#34495e', tension: 0.3 },
+                        { label: '2026 Velocity', data: permitData[2026], borderColor: '#e67e22', borderWidth: 4, tension: 0.3 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        window.onload = renderChart;
+    </script>
+</body>
+</html>
