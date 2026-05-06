@@ -2,90 +2,121 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Pulte Strategy - Westfield</title>
+    <title>Westfield Market Intelligence</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
-        .header { background: #2c3e50; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; }
-        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 8px solid #2c3e50; }
-        .warning { border-top-color: #e67e22; }
-        .label { color: #7f8c8d; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-        .value { font-size: 48px; font-weight: bold; color: #2c3e50; margin: 15px 0; }
-        .footer { font-size: 14px; color: #27ae60; font-weight: 600; }
+        :root { --dark: #2c3e50; --accent: #e67e22; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
         
-        /* Agent UI */
-        #agent { position: fixed; bottom: 20px; right: 20px; z-index: 999; }
-        #chat { display: none; width: 320px; height: 400px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); flex-direction: column; overflow: hidden; border: 1px solid #ddd; margin-bottom: 15px; }
-        .chat-h { background: #2c3e50; color: white; padding: 15px; font-weight: bold; text-align: center; }
-        #flow { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 13px; background: #fafafa; }
-        .bot { background: #eee; padding: 10px; border-radius: 10px; align-self: flex-start; max-width: 85%; }
-        .user { background: #3498db; color: white; padding: 10px; border-radius: 10px; align-self: flex-end; max-width: 85%; }
-        .input { padding: 10px; border-top: 1px solid #eee; display: flex; }
-        input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 5px; outline: none; }
-        #fab { width: 60px; height: 60px; background: #2c3e50; border-radius: 50%; color: white; border: none; font-size: 30px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .header { background: var(--dark); color: white; padding: 20px; border-radius: 8px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-top: 6px solid var(--dark); }
+        .warning { border-top-color: var(--accent); }
+        
+        .label { font-size: 12px; font-weight: bold; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
+        .value { font-size: 44px; font-weight: bold; color: var(--dark); margin: 10px 0; }
+        .desc { font-size: 14px; color: #27ae60; font-weight: 600; }
+
+        /* AI Agent */
+        #agent-ui { position: fixed; bottom: 30px; right: 30px; z-index: 1000; }
+        #chat-window { 
+            display: none; width: 340px; height: 450px; background: white; border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); flex-direction: column; overflow: hidden; border: 1px solid #ddd; margin-bottom: 15px;
+        }
+        .chat-header { background: var(--dark); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; }
+        #chat-flow { flex: 1; padding: 15px; overflow-y: auto; background: #fafafa; display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
+        .msg { padding: 10px; border-radius: 10px; max-width: 85%; line-height: 1.4; }
+        .bot { background: #e8e8e8; align-self: flex-start; }
+        .user { background: #3498db; color: white; align-self: flex-end; }
+        .chat-input { padding: 12px; border-top: 1px solid #eee; display: flex; gap: 8px; }
+        #input-box { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 15px; outline: none; }
+        #fab { 
+            width: 65px; height: 65px; background: var(--dark); border-radius: 50%; color: white; 
+            border: 3px solid white; font-size: 30px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <strong>PULTE STRATEGY GROUP</strong>
-    <span>Market Intel: Westfield, IN</span>
+    <div style="font-size: 20px; letter-spacing: 1px;">STRATEGY<strong>INTELLIGENCE</strong></div>
+    <div style="font-size: 14px; opacity: 0.8;">Westfield, IN Sector</div>
 </div>
 
-<div class="dashboard">
+<div class="grid">
     <div class="card">
-        <div class="label">Total Westfield Parcels</div>
+        <div class="label">Total Tax Parcels</div>
         <div class="value">27,859</div>
-        <div class="footer">Verified GDB Source</div>
+        <div class="desc">✔ Hamilton County Open Data</div>
     </div>
+
     <div class="card warning">
         <div class="label">Months of Supply (MOS)</div>
         <div class="value">3.4</div>
-        <div class="footer" style="color: #e67e22;">Supply Vacuum Detected</div>
+        <div class="desc" style="color:var(--accent);">CRITICAL INVENTORY VACUUM</div>
     </div>
+
     <div class="card">
         <div class="label">Vacant Platted Lots</div>
         <div class="value">3,022</div>
-        <div class="footer" style="color: #2980b9;">Ready for Pipeline</div>
+        <div class="desc" style="color:#2980b9;">Verified SFD Pipeline</div>
     </div>
 </div>
 
-<div id="agent">
-    <div id="chat">
-        <div class="chat-h">Market Analyst AI</div>
-        <div id="flow">
-            <div class="bot">Verification complete. 27,859 parcels loaded. Ready for Pulte briefing.</div>
+<div id="agent-ui">
+    <div id="chat-window">
+        <div class="chat-header">
+            <span>Product Analyst AI</span>
+            <span onclick="toggleChat()" style="cursor:pointer">✕</span>
         </div>
-        <div class="input">
-            <input type="text" id="user-in" placeholder="Ask about the vacuum..." onkeypress="if(event.key==='Enter') send()">
+        <div id="chat-flow">
+            <div class="msg bot">
+                Verified: 27,859 total parcels found for Westfield Tax District.
+            </div>
+            <div class="msg bot">
+                System identifies 3,022 'Vacant Platted' lots. At current absorption, this creates a 3.4-month supply vacuum.
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="input-box" placeholder="Ask about the vacuum..." onkeypress="if(event.key==='Enter') sendMsg()">
+            <button onclick="sendMsg()" style="background:var(--accent); color:white; border:none; border-radius:50%; width:30px; height:30px; cursor:pointer;">➔</button>
         </div>
     </div>
-    <button id="fab" onclick="toggle()">🤖</button>
+    <button id="fab" onclick="toggleChat()">🤖</button>
 </div>
 
 <script>
-    function toggle() {
-        var c = document.getElementById('chat');
-        c.style.display = (c.style.display === 'none' || c.style.display === '') ? 'flex' : 'none';
+    function toggleChat() {
+        const win = document.getElementById('chat-window');
+        win.style.display = (win.style.display === 'none' || win.style.display === '') ? 'flex' : 'none';
     }
-    function send() {
-        var i = document.getElementById('user-in');
-        var f = document.getElementById('flow');
-        if(!i.value.trim()) return;
-        var u = document.createElement('div'); u.className = 'user'; u.innerText = i.value; f.appendChild(u);
-        var v = i.value.toLowerCase(); i.value = "";
-        setTimeout(function() {
-            var b = document.createElement('div'); b.className = 'bot';
-            if(v.includes('supply') || v.includes('vacuum')) {
-                b.innerHTML = "<strong>Alert:</strong> Current inventory of 3,022 vacant lots provides only 3.4 months of supply based on Westfield absorption velocity.";
+
+    function sendMsg() {
+        const input = document.getElementById('input-box');
+        const flow = document.getElementById('chat-flow');
+        if (!input.value.trim()) return;
+
+        const uMsg = document.createElement('div');
+        uMsg.className = 'msg user';
+        uMsg.innerText = input.value;
+        flow.appendChild(uMsg);
+
+        const val = input.value.toLowerCase();
+        input.value = "";
+
+        setTimeout(() => {
+            const bMsg = document.createElement('div');
+            bMsg.className = 'msg bot';
+            if (val.includes('supply') || val.includes('vacuum')) {
+                bMsg.innerHTML = "<strong>Supply Vacuum:</strong> Current inventory of 3,022 ready lots will be exhausted in ~3.4 months based on current sales velocity.";
             } else {
-                b.innerText = "Analyzing GDB parcel classes for acquisition strategy.";
+                bMsg.innerText = "Analyzing 27,859 parcels for Q3 acquisition targets.";
             }
-            f.appendChild(b); f.scrollTop = f.scrollHeight;
+            flow.appendChild(bMsg);
+            flow.scrollTop = flow.scrollHeight;
         }, 600);
     }
-    // Auto-open
-    setTimeout(toggle, 2000);
+    setTimeout(toggleChat, 2000);
 </script>
 
 </body>
