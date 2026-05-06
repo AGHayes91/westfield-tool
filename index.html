@@ -16,15 +16,18 @@
         /* AI Chat Area */
         #aiSection { display: none; margin-bottom: 30px; padding: 20px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; }
         .chat-controls { display: flex; gap: 10px; }
-        #askInput { flex-grow: 1; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; outline: none; }
+        #askInput { flex-grow: 1; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; outline: none; font-size: 1rem; }
         #askBtn { padding: 12px 24px; background: #3182ce; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         #askBtn:hover { background: #2b6cb0; }
-        #aiResponse { margin-top: 15px; padding: 15px; background: #ebf8ff; border-left: 4px solid #3182ce; border-radius: 4px; color: #2c5282; line-height: 1.5; font-size: 1.1rem; }
+        
+        #aiResponse { margin-top: 15px; padding: 15px; background: #ebf8ff; border-left: 4px solid #3182ce; border-radius: 4px; color: #2c5282; line-height: 1.5; font-size: 1.1rem; animation: fadeIn 0.3s ease-in; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* Table Area */
         .table-container { overflow-x: auto; margin-top: 20px; max-height: 400px; border-radius: 8px; border: 1px solid #e2e8f0; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        th, td { border-bottom: 1px solid #edf2f7; padding: 12px; text-align: left; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { border-bottom: 1px solid #edf2f7; padding: 10px; text-align: left; }
         th { background-color: #2d3748; color: white; position: sticky; top: 0; }
         tr:hover { background-color: #f7fafc; }
         #status { font-size: 0.8rem; color: #718096; margin-top: 10px; text-align: center; }
@@ -36,21 +39,21 @@
     <h1>Westfield Property AI Agent</h1>
     
     <div class="upload-box" id="uploadBox">
-        <strong>Step 1: Load your inventory data</strong><br>
+        <strong>Step 1: Load Westfield Inventory CSV</strong><br>
         <input type="file" id="fileInput" accept=".csv">
     </div>
 
     <!-- AI Agent Interface -->
     <div id="aiSection">
-        <p><strong>Step 2: Ask the Agent a question</strong></p>
+        <p><strong>Step 2: Ask the Agent about the data</strong></p>
         <div class="chat-controls">
-            <input type="text" id="askInput" placeholder="Try: 'total parcels' or 'vacant land'...">
+            <input type="text" id="askInput" placeholder="e.g., 'How many homes?' or 'Total parcels'...">
             <button id="askBtn">Ask Agent</button>
         </div>
         <div id="aiResponse" style="display:none;"></div>
     </div>
 
-    <div id="status">Waiting for CSV file...</div>
+    <div id="status">Waiting for data...</div>
 
     <div class="table-container">
         <table id="dataTable">
@@ -83,7 +86,6 @@
             headerRow.innerHTML = "";
             tableBody.innerHTML = "";
 
-            // Create Headers
             const headers = rows[0].split(',');
             headers.forEach(h => {
                 const th = document.createElement('th');
@@ -91,7 +93,6 @@
                 headerRow.appendChild(th);
             });
 
-            // Create Rows
             for (let i = 1; i < rows.length; i++) {
                 const tr = document.createElement('tr');
                 const cells = rows[i].split(',');
@@ -103,45 +104,58 @@
                 tableBody.appendChild(tr);
             }
 
-            status.innerText = "Data Loaded Successfully.";
+            status.innerText = "Data Synced. Agent is Online.";
             aiSection.style.display = "block";
             document.getElementById('uploadBox').style.display = "none";
         };
         reader.readAsText(file);
     });
 
-    // Simple AI Logic
+    // Smart AI Logic for Demo
     askBtn.addEventListener('click', function() {
-        const query = askInput.value.toLowerCase();
-        const rows = Array.from(tableBody.getElementsByTagName('tr'));
-        let found = false;
+        const query = askInput.value.toLowerCase().trim();
+        if (!query) return;
 
-        // Search through the metrics in the table
-        for (let row of rows) {
-            const metric = row.cells[0].innerText.toLowerCase();
-            const value = row.cells[1].innerText;
-            
-            // Check if the user's question mentions a keyword from the metric
-            if (query.includes(metric) || metric.includes(query)) {
-                aiResponse.innerHTML = `<strong>Agent:</strong> The data shows ${value} for <strong>${row.cells[0].innerText}</strong>.`;
-                found = true;
-                break;
+        const rows = Array.from(tableBody.getElementsByTagName('tr'));
+        let foundMatch = null;
+
+        // Synonym Map to make the demo feel "smarter"
+        const synonyms = {
+            "total": ["total", "how many", "count", "parcels"],
+            "vacant": ["vacant", "pipeline", "unbuilt", "left", "available"],
+            "single family": ["single family", "houses", "homes", "residential"],
+            "supply": ["supply", "years", "pace", "how long"],
+            "commercial": ["commercial", "business", "land"],
+            "townhome": ["townhome", "attached", "condo"]
+        };
+
+        // 1. Check for Synonym matches
+        for (let metricKey in synonyms) {
+            if (synonyms[metricKey].some(syn => query.includes(syn))) {
+                // Find the row that matches the metricKey
+                foundMatch = rows.find(row => row.cells[0].innerText.toLowerCase().includes(metricKey));
+                if (foundMatch) break;
             }
         }
 
-        if (!found) {
-            aiResponse.innerHTML = "<strong>Agent:</strong> I'm not sure about that one. Try asking about 'parcels', 'vacant', or 'supply'.";
+        // 2. If no synonym match, try a direct text match
+        if (!foundMatch) {
+            foundMatch = rows.find(row => row.cells[0].innerText.toLowerCase().includes(query) || query.includes(row.cells[0].innerText.toLowerCase()));
+        }
+
+        if (foundMatch) {
+            const metricName = foundMatch.cells[0].innerText;
+            const countValue = foundMatch.cells[1].innerText;
+            aiResponse.innerHTML = `<strong>Agent:</strong> For <strong>${metricName}</strong>, the record shows <strong>${countValue}</strong>.`;
+        } else {
+            aiResponse.innerHTML = "<strong>Agent:</strong> I couldn't find a direct match for that. Try asking about 'Total Parcels', 'Vacant Pipeline', or 'Supply Years'.";
         }
 
         aiResponse.style.display = "block";
     });
 
-    // Allow pressing "Enter" to ask
-    askInput.addEventListener("keypress", function(event) {
-        if (event.key === "Enter") {
-            askBtn.click();
-        }
-    });
+    // Enter Key Support
+    askInput.addEventListener("keypress", (e) => { if (e.key === "Enter") askBtn.click(); });
 </script>
 
 </body>
