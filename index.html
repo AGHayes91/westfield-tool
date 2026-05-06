@@ -3,121 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Westfield Property Inventory AI</title>
+    <title>Westfield Market Intelligence Dashboard</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background-color: #f0f2f5; color: #1a202c; line-height: 1.6; }
-        .container { max-width: 850px; margin: auto; background: white; padding: 35px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        h1 { color: #2d3748; margin-top: 0; text-align: center; font-size: 2rem; border-bottom: 2px solid #edf2f7; padding-bottom: 20px; margin-bottom: 30px; }
-        
-        /* The Presentation Intro */
-        .intro-box { background: #f8fafc; border-left: 5px solid #3182ce; padding: 25px; border-radius: 8px; margin-bottom: 25px; }
-        .intro-box h3 { margin-top: 0; color: #2c5282; font-size: 1.2rem; margin-bottom: 10px; }
-        .one-liner { background: #ebf8ff; padding: 20px; border-radius: 8px; font-weight: 600; color: #2b6cb0; border: 1px dashed #bee3f8; font-size: 1.1rem; text-align: center; }
-
-        /* The Quote Section */
-        .quote-box { background: #fffaf0; border: 1px solid #feebc8; padding: 20px; border-radius: 12px; margin-bottom: 30px; color: #744210; font-style: italic; }
-        .quote-box strong { color: #c05621; font-style: normal; }
-
-        /* Quick Stats Grid */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 40px; }
-        .stat-card { background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        .stat-card .val { display: block; font-size: 1.8rem; font-weight: 800; color: #3182ce; margin-bottom: 5px; }
-        .stat-card .lbl { font-size: 0.75rem; color: #718096; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-
-        /* AI Interaction Area */
-        .ai-section { background: #ffffff; border: 2px solid #e2e8f0; padding: 25px; border-radius: 15px; margin-bottom: 30px; }
-        .ai-section h4 { margin-top: 0; margin-bottom: 15px; color: #2d3748; }
-        .chat-controls { display: flex; gap: 10px; }
-        #askInput { flex-grow: 1; padding: 14px; border: 1px solid #cbd5e0; border-radius: 10px; outline: none; font-size: 1rem; }
-        #askBtn { padding: 14px 28px; background: #3182ce; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        #askBtn:hover { background: #2b6cb0; transform: scale(1.02); }
-        #aiResponse { margin-top: 20px; padding: 18px; background: #f0fff4; border-left: 4px solid #38a169; border-radius: 6px; color: #22543d; font-size: 1.1rem; display: none; animation: slideIn 0.3s ease-out; }
-
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .footer-note { text-align: center; font-size: 0.8rem; color: #a0aec0; margin-top: 20px; }
+        :root {
+            --primary: #2c3e50;
+            --accent: #e67e22;
+            --light: #ecf0f1;
+            --dark: #34495e;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--primary);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f7f6;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .stat-box {
+            text-align: center;
+            padding: 20px;
+            background: var(--light);
+            border-radius: 6px;
+            border-top: 4px solid var(--accent);
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            display: block;
+            color: var(--dark);
+        }
+        .stat-label {
+            font-size: 14px;
+            text-transform: uppercase;
+            color: #7f8c8d;
+        }
+        .quote-box {
+            font-style: italic;
+            border-left: 5px solid var(--accent);
+            padding: 15px 25px;
+            background: #fffdfa;
+            margin: 20px 0;
+        }
+        h1, h2 { color: var(--dark); }
+        .data-source {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Westfield Housing Inventory Agent</h1>
+    <h1>Westfield Market Analysis</h1>
+    
+    <div class="card">
+        <h2>Supply & Absorption Metrics</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <span class="stat-value" id="ttm-total">...</span>
+                <span class="stat-label">TTM Total Permits</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-value" id="monthly-rate">...</span>
+                <span class="stat-label">Monthly Absorption</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-value" id="trend-indicator">...</span>
+                <span class="stat-label">Current Trend</span>
+            </div>
+        </div>
+        <p class="data-source">Source: MarketGraphics Regional Reports (2024-2026)</p>
+    </div>
 
-    <div class="intro-box">
-        <h3>The High-Level Takeaway</h3>
-        <div class="one-liner">
-            "Westfield has roughly 3,700 vacant residential parcels. At the city's current building pace, that's about 3 years of housing supply in the ground waiting to be built."
+    <div class="card">
+        <h2>Pipeline Context</h2>
+        <div class="quote-box" id="pipeline-quote">
+            Loading market analysis...
         </div>
     </div>
 
-    <div class="quote-box">
-        <strong>The Pipeline Context:</strong><br>
-        "Westfield issued 1,149 new home permits in 2023 — meaning 1,149 new homes started construction that year. That's your absorption rate, basically how fast the city is building."
-    </div>
+    <script>
+        // Data derived from MarketGraphics Reports[cite: 1, 2, 3]
+        const permitData = {
+            2024: [155, 116, 178, 191, 183, 121, 115, 128, 155, 128, 77, 100],
+            2025: [145, 99, 156, 95, 95, 95, 97, 78, 65, 64, 91, 173],
+            2026: [133, 60, 91] // Q1 2026 Data[cite: 3]
+        };
 
-    <div class="stats-grid">
-        <div class="stat-card">
-            <span class="val">27,873</span>
-            <span class="lbl">Total Parcels</span>
-        </div>
-        <div class="stat-card">
-            <span class="val">18,704</span>
-            <span class="lbl">Single Family</span>
-        </div>
-        <div class="stat-card">
-            <span class="val">3,746</span>
-            <span class="lbl">Vacant Units</span>
-        </div>
-        <div class="stat-card">
-            <span class="val">3.3 Years</span>
-            <span class="lbl">Supply Pace</span>
-        </div>
-    </div>
+        function updateDashboard() {
+            // 1. Calculate Trailing 12 Months (TTM)
+            const allPermits = [
+                ...permitData[2024], 
+                ...permitData[2025], 
+                ...permitData[2026]
+            ];
+            
+            const last12Months = allPermits.slice(-12);
+            const ttmTotal = last12Months.reduce((a, b) => a + b, 0);
+            const monthlyRate = (ttmTotal / 12).toFixed(2);
 
-    <div class="ai-section">
-        <h4>Ask the Inventory Agent</h4>
-        <div class="chat-controls">
-            <input type="text" id="askInput" placeholder="Ask about 'supply', 'permits', or 'vacant land'...">
-            <button id="askBtn">Analyze</button>
-        </div>
-        <div id="aiResponse"></div>
-    </div>
+            // 2. Calculate YoY Trend for the current month (March)
+            const march26 = permitData[2026][2]; // 91
+            const march25 = permitData[2025][2]; // 156
+            const trend = (((march26 - march25) / march25) * 100).toFixed(0);
 
-    <p class="footer-note">Source Data: 2024 Westfield Property Inventory Records & 2023 Permit Filings.</p>
-</div>
+            // 3. Update UI Elements
+            document.getElementById('ttm-total').textContent = ttmTotal.toLocaleString();
+            document.getElementById('monthly-rate').textContent = monthlyRate;
+            document.getElementById('trend-indicator').textContent = `${trend}% YoY`;
 
-<script>
-    const data = {
-        "total": "There are 27,873 total parcels within Westfield city limits",
-        "vacant": "There are 3,746 residential units currently in the unbuilt pipeline",
-        "pipeline": "The unbuilt pipeline consists of 3,746 residential parcels",
-        "supply": "Based on current absorption, there is approximately 3.3 years of supply",
-        "pace": "The building pace is established by the 1,149 permits issued in 2023",
-        "permits": "Westfield issued 1,149 new home permits in 2023",
-        "homes": "The city has 18,704 existing Single Family parcels",
-        "townhome": "There are 2,488 Townhome or Attached units recorded"
-    };
-
-    const askInput = document.getElementById('askInput');
-    const askBtn = document.getElementById('askBtn');
-    const aiResponse = document.getElementById('aiResponse');
-
-    askBtn.addEventListener('click', () => {
-        const query = askInput.value.toLowerCase();
-        let answer = "I'm sorry, I don't see that specific metric. Try asking about 'vacant land', 'supply', or 'permits'.";
-
-        for (let key in data) {
-            if (query.includes(key)) {
-                answer = `<strong>Agent:</strong> ${data[key]}.`;
-                break;
-            }
+            // 4. Update the Pipeline Quote
+            const quoteElement = document.getElementById('pipeline-quote');
+            quoteElement.innerHTML = `
+                "While Westfield remains a premier growth honors market, new supply is tightening significantly. 
+                As of Q1 2026, the trailing 12-month absorption has adjusted to <strong>${monthlyRate} permits per month</strong>—a 
+                notable decrease from the 2024 highs. This constriction in the pipeline, combined with limited 
+                shovel-ready plat availability, suggests a looming supply vacuum for townhome developments 
+                in the Noblesville-Westfield corridor."
+            `;
         }
 
-        aiResponse.innerHTML = answer;
-        aiResponse.style.display = 'block';
-    });
-
-    askInput.addEventListener("keypress", (e) => { if (e.key === "Enter") askBtn.click(); });
-</script>
-
+        // Initialize on load
+        window.onload = updateDashboard;
+    </script>
 </body>
 </html>
